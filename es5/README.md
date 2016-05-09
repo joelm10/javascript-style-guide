@@ -1,12 +1,12 @@
 [![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/airbnb/javascript?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-# Airbnb JavaScript Style Guide() {
+# CrownBet JavaScript Style Guide() {
 
-*A mostly reasonable approach to JavaScript*
+*A mostly reasonable approach to JavaScript, forked from AirBnb's style guide*
 
 
 ## Table of Contents
-
+  1. [General](#General)
   1. [Types](#types)
   1. [Objects](#objects)
   1. [Arrays](#arrays)
@@ -38,6 +38,12 @@
   1. [Chat With Us About Javascript](#chat-with-us-about-javascript)
   1. [Contributors](#contributors)
   1. [License](#license)
+
+## General
+  - Always leave the code in a better state than when you found it
+  - Commit any refactoring work in a seperate commit, to new functionality.
+  - Lint! Always lint your code before you commit.
+  - Test! Always dev test your code before you commit.
 
 ## Types
 
@@ -178,7 +184,8 @@
 
 ## Strings
 
-  - Use single quotes `''` for strings.
+  - Use single quotes `''` for strings. This applies to both native strings, and string based jQuery selector usage.
+  - Double quotes should only be used in HTML, not JS
 
     ```javascript
     // bad
@@ -209,8 +216,9 @@
 
     // good
     var errorMessage = 'This is a super long error that was thrown because ' +
-      'of Batman. When you stop to think about how Batman had anything to do ' +
-      'with this, you would get nowhere fast.';
+        'of Batman. When you stop to think about how Batman had anything to do ' +
+        'with this, you would get nowhere fast.';
+
     ```
 
   - When programmatically building up a string, use Array#join instead of string concatenation. Mostly for IE: [jsPerf](http://jsperf.com/string-vs-array-concat/2).
@@ -390,7 +398,8 @@
     var dragonball = 'z';
     ```
 
-  - Declare unassigned variables last. This is helpful when later on you might need to assign a variable depending on one of the previous assigned variables.
+  - Declare unassigned variables last. 
+  This is helpful when later on you might need to assign a variable depending on one of the previous assigned variables.
 
     ```javascript
     // bad
@@ -482,6 +491,7 @@
 ## Hoisting
 
   - Variable declarations get hoisted to the top of their scope, but their assignment does not.
+  - This one is essential to be aware of, given our current tech debt with variable creation.
 
     ```javascript
     // we know this wouldn't work (assuming there
@@ -612,6 +622,45 @@
     }
     ```
 
+  - Backbone Variable assignment
+    ```javascript
+    // Bad- assuming dom element exists, and using it as template var
+     modal = Backbone.View.extend({
+         el: $('.perform-stream-modalHolder'),
+         template: '#perform-stream-template',
+         ...stufff
+         initialize: function() {
+             ...
+             // always add a check if the template value exists, and bail if not
+             if (!$('#perform-stream-template').length) {
+                 return false;
+             }
+         },
+         render: function(){
+            ...
+         }
+     });
+
+    // good
+    modal = Backbone.View.extend({
+         el: $('.perform-stream-modalHolder'),
+         template: false,
+         ...stufff
+         initialize: function() {
+             ...
+             // always add a check if the template value exists, and bail if not
+             if (!$('#perform-stream-template').length) {
+                 return false;
+             }
+             // assign template after checking dom element exists
+             this.template= '#perform-stream-template';
+         },
+         render: function(){
+            ...
+         }
+     });
+
+    ```
   - For more information see [Truth Equality and JavaScript](http://javascriptweblog.wordpress.com/2011/02/07/truth-equality-and-javascript/#more-2108) by Angus Croll.
 
 **[⬆ back to top](#table-of-contents)**
@@ -619,15 +668,12 @@
 
 ## Blocks
 
-  - Use braces with all multi-line blocks.
+  - Always ensure you use braces with both single and multi-line blocks.
 
     ```javascript
     // bad
     if (test)
       return false;
-
-    // good
-    if (test) return false;
 
     // good
     if (test) {
@@ -644,7 +690,7 @@
     ```
 
   - If you're using multi-line blocks with `if` and `else`, put `else` on the same line as your
-    `if` block's closing brace.
+    `if` block's closing brace, unless you need to add comments about your else/else if statement
 
     ```javascript
     // bad
@@ -654,7 +700,7 @@
     }
     else {
       thing3();
-    }
+-    }
 
     // good
     if (test) {
@@ -663,6 +709,39 @@
     } else {
       thing3();
     }
+
+
+     // good
+    if (test) {
+      thing1();
+      thing2();
+    } 
+    // comment for else goes here
+    else {
+      thing3();
+    }
+
+    // Good- for else with comment
+    // Thank you date display
+    // confirm value is passed through from API
+    if (params.expectedDate !== '' && params.expectedDate !== null) {
+        expectedDate = params.expectedDate;
+    }
+    // fallback to js date setup if API empty
+    else {
+        expectedDate = moment().add(21, 'days').format('DD MMMM YYYY');
+    }
+
+    // Good- where no comment required
+    // Thank you date display
+    // confirm value is passed through from API, otherwise 
+    // fallback to js date setup if API empty
+    if (params.expectedDate !== '' && params.expectedDate !== null) {
+        expectedDate = params.expectedDate;
+    } else {
+        expectedDate = moment().add(21, 'days').format('DD MMMM YYYY');
+    }
+
     ```
 
 
@@ -672,6 +751,7 @@
 ## Comments
 
   - Use `/** ... */` for multi-line comments. Include a description, specify types and values for all parameters and return values.
+  - The only caveat for this is inside functions, where you should either use single line comments, and/or move it above your function definition 
 
     ```javascript
     // bad
@@ -733,14 +813,13 @@
     }
     ```
 
-  - Prefixing your comments with `FIXME` or `TODO` helps other developers quickly understand if you're pointing out a problem that needs to be revisited, or if you're suggesting a solution to the problem that needs to be implemented. These are different than regular comments because they are actionable. The actions are `FIXME -- need to figure this out` or `TODO -- need to implement`.
+  - Prefixing your comments with `TODO` helps other developers quickly understand if you're pointing out a problem that needs to be revisited, or if you're suggesting a solution to the problem that needs to be implemented. These are different than regular comments because they are actionable. The actions are `// TODO -- need to implement`.
 
-  - Use `// FIXME:` to annotate problems.
 
     ```javascript
     function Calculator() {
 
-      // FIXME: shouldn't use a global here
+      // TODO: shouldn't use a global here
       total = 0;
 
       return this;
@@ -764,12 +843,13 @@
 
 ## Whitespace
 
-  - Use soft tabs set to 2 spaces.
+  - Use soft tabs set to 4 spaces, not tabs.
+  - Tabs are bad mkay..
 
     ```javascript
     // bad
     function () {
-    ∙∙∙∙var name;
+    ∙∙var name;
     }
 
     // bad
@@ -779,7 +859,7 @@
 
     // good
     function () {
-    ∙∙var name;
+    ∙∙∙∙var name;
     }
     ```
 
@@ -834,6 +914,7 @@
     ```
 
   - Set off operators with spaces.
+  - This makes the code far more readable, and clean :)
 
     ```javascript
     // bad
@@ -950,6 +1031,7 @@
 ## Commas
 
   - Leading commas: **Nope.**
+  - Just nope, do not have leading or trailing commas.
 
     ```javascript
     // bad
@@ -1017,6 +1099,7 @@
 ## Semicolons
 
   - **Yup.**
+  - They make your code far cleaner, Lint-able and protect us from functions, conditionals etc interacting with things before and after once minified.
 
     ```javascript
     // bad
@@ -1089,6 +1172,7 @@
     ```
 
   - If for whatever reason you are doing something wild and `parseInt` is your bottleneck and need to use Bitshift for [performance reasons](http://jsperf.com/coercion-vs-casting/3), leave a comment explaining why and what you're doing.
+  - Always add a radix, to ensure the data is valid and in the nice happy format
 
     ```javascript
     // good
@@ -1129,6 +1213,7 @@
 ## Naming Conventions
 
   - Avoid single letter names. Be descriptive with your naming.
+  - Ensure you use relevant naming structures, that are in context to the file/namespace
 
     ```javascript
     // bad
@@ -1178,7 +1263,8 @@
     });
     ```
 
-  - Use a leading underscore `_` when naming private properties.
+  - Use a leading underscore `_` when naming private properties. (optional) 
+  - This is a nice to have, as our legacy codebase does not have privates (yet)
 
     ```javascript
     // bad
@@ -1190,6 +1276,8 @@
     ```
 
   - When saving a reference to `this` use `_this`.
+  - Dont use other things like self, that or the like. 
+  - **Yup, use the _this format**
 
     ```javascript
     // bad
@@ -1218,6 +1306,7 @@
     ```
 
   - Name your functions. This is helpful for stack traces.
+  - Name it appropriately :)
 
     ```javascript
     // bad
@@ -1288,7 +1377,8 @@
     }
     ```
 
-  - It's okay to create get() and set() functions, but be consistent.
+  - Use a relevant getThing() and setThing() as opposed to just a get() or set()
+  - And be consistent with your approach on this.
 
     ```javascript
     function Jedi(options) {
@@ -1469,6 +1559,8 @@
     ```
 
   - Cache jQuery lookups.
+  - Always cache your lookups, if your using in further down the codebase.
+  - Lets be honest, we have far too much jQuery lookups as is... dont make it worse :)
 
     ```javascript
     // bad
