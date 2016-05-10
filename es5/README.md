@@ -1,6 +1,4 @@
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/airbnb/javascript?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-
-# CrownBet JavaScript Style Guide() {
+# CrownBet JavaScript Style Guide()
 
 *A mostly reasonable approach to JavaScript, forked from AirBnb's style guide*
 
